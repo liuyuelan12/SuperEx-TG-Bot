@@ -22,27 +22,6 @@ wheels/
 *.egg
 venv/
 
-# Telegram sessions
-sessions/
-*.session
-*.session-journal
-
-# Environment variables
-.env
-
-# Project specific
-话术/
-auto_send.log
-telegram_download.log
-*.log
-
-# Media files
-media_files/
-*.mp4
-*.jpg
-*.jpeg
-*.png
-*.gif
 
 # IDE specific
 .idea/
