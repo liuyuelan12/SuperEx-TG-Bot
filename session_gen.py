@@ -8,7 +8,11 @@ import random
 
 # Phone Numbers List
 PHONE_NUMBERS = [
-    '+18049424725'
+    '+19092884592',
+    '+18624223419',
+    '+19017495411',
+    '+18628013319',
+    '+19097071406'
 ]
 
 async def try_connect_with_proxy(phone_number, proxy_config, session_dir):

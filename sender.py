@@ -12,6 +12,10 @@ import csv
 import json
 import config
 
+# Force UTF-8 encoding for Windows console
+if sys.platform.startswith('win'):
+    sys.stdout.reconfigure(encoding='utf-8')
+
 # Configuration Constants
 DEFAULT_MIN_INTERVAL = 5
 DEFAULT_MAX_INTERVAL = 120
@@ -279,6 +283,9 @@ async def worker(group_key, config_item, args):
 
     print(f"[{group_key}] Active clients: {len(clients)}")
 
+    # Force stdout to utf-8 for Windows console
+    sys.stdout.reconfigure(encoding='utf-8')
+    
     # Loop configuration
     should_loop = args.loop or config_item.get('loop', False)
 
