@@ -216,6 +216,11 @@ async def send_message_safe(client, entity, message_data, reply_to=None, media_b
             
     except Exception as e:
         print(f"[{user_info}] Send failed: {e}")
+        # If it's a connection error, try to disconnect so we reconnect next time
+        try:
+            await client.disconnect()
+        except:
+            pass
         return False
         
     return False
@@ -301,15 +306,38 @@ async def worker(group_key, config_item, args):
             # me = await client.get_me() # Cached
             # print(f"[{group_key}] Sending msg {i} via {me.first_name}...")
             
+            # Ensure client is connected
+            if not client.is_connected():
+                # print(f"[{group_key}] Reconnecting client for {me.first_name}...")
+                try:
+                    await client.connect()
+                except Exception as e:
+                    print(f"[{group_key}] Failed to reconnect {me.first_name}: {e}")
+                    continue
+
             success = await send_message_safe(client, group_link, msg_data, reply_to=reply_target, media_base_dir=media_base_dir)
             
             if success:
                 # Interval
                 wait = random.uniform(min_interval, max_interval)
                 print(f"[{group_key}] Sent msg {i}. Waiting {wait:.1f}s...")
+                
+                # If wait time is long, disconnect to save resources and avoid timeouts
+                # Telegram/Proxies often kill idle connections stats > 30s
+                if wait > 30:
+                    try:
+                        await client.disconnect()
+                    except:
+                        pass
+                
                 await asyncio.sleep(wait)
             else:
                 print(f"[{group_key}] Failed to send msg {i}. Skipping delay.")
+                # If failed, it might be a connection issue. Ensure disconnect so we reconnect next time.
+                try:
+                    await client.disconnect()
+                except:
+                    pass
                 
         if not should_loop:
             break
@@ -317,7 +345,7 @@ async def worker(group_key, config_item, args):
         await asyncio.sleep(5)
 
     # Cleanup
-    for c in clients:
+    for c, _ in clients: # clients is list of tuples (client, me)
         await c.disconnect()
 
 async def main():
