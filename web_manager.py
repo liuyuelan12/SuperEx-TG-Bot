@@ -30,25 +30,32 @@ os.makedirs("static/photos", exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Proxy logic (reused)
-def get_proxy_config():
-    if not config.PROXY_LIST:
-        return None
-    # Use the first proxy for management operations, or random
-    p = config.PROXY_LIST[0]
-    # ("socks5", "ip", port, rdns, "user", "pass")
-    return p
-
 async def get_client(session_path: str):
-    """Create and connect a client for a specific session file."""
-    proxy = get_proxy_config()
-    client = TelegramClient(
-        session_path,
-        config.API_ID,
-        config.API_HASH,
-        proxy=proxy
-    )
-    await client.connect()
-    return client
+    """Create and connect a client for a specific session file, trying proxies in order."""
+    if not config.PROXY_LIST:
+        # Try without proxy? Or fail? The previous code implied proxy was required if list existed.
+        # If empty list, passing None to proxy usually works for direct connection.
+        client = TelegramClient(session_path, config.API_ID, config.API_HASH)
+        await client.connect()
+        return client
+
+    last_exc = None
+    for proxy_conf in config.PROXY_LIST:
+        try:
+            client = TelegramClient(
+                session_path,
+                config.API_ID,
+                config.API_HASH,
+                proxy=proxy_conf
+            )
+            await client.connect()
+            return client
+        except Exception as e:
+            last_exc = e
+            # Try next proxy
+            pass
+            
+    raise Exception(f"Failed to connect with any proxy. Last error: {last_exc}")
 
 class SessionUpdate(BaseModel):
     session_file: str

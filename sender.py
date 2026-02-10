@@ -117,7 +117,7 @@ async def init_clients_for_group(session_folder, group_link):
         # Shuffle proxies to distribute load? Or keep order. config.PROXY_LIST is usually short.
         # Let's just try sequentially or random. Random is better for avoiding same proxy spam if list is long.
         proxies = list(config.PROXY_LIST)
-        random.shuffle(proxies)
+        # random.shuffle(proxies) # User requested fixed order: try first, then second.
         
         for proxy in proxies:
             client = await try_connect(session_file, proxy)

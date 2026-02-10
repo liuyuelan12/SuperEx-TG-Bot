@@ -8,11 +8,11 @@ import random
 
 # Phone Numbers List
 PHONE_NUMBERS = [
-    '+19092884592',
-    '+18624223419',
-    '+19017495411',
-    '+18628013319',
-    '+19097071406'
+    '+14695262206',
+    '+14692857340',
+    '+14237125924',
+    '+14236005142',
+    '+14406144910'
 ]
 
 async def try_connect_with_proxy(phone_number, proxy_config, session_dir):
@@ -106,14 +106,20 @@ async def main():
     
     # Process numbers
     for phone in PHONE_NUMBERS:
-        # Pick a random proxy for each connection attempt
         if not config.PROXY_LIST:
             print("Error: No proxies found in config.PROXY_LIST")
             return
             
-        proxy = random.choice(config.PROXY_LIST)
+        # Try proxies in order (First then Second...)
+        session_created = False
+        for proxy in config.PROXY_LIST:
+            print(f"Trying proxy {proxy[1]} for {phone}...")
+            if await try_connect_with_proxy(phone, proxy, target_dir):
+                session_created = True
+                break
         
-        await try_connect_with_proxy(phone, proxy, target_dir)
+        if not session_created:
+             print(f"Failed to create session for {phone} with any proxy.")
         
     print("\nAll Done.")
 

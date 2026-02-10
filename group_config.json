@@ -8,14 +8,5 @@
         "min_interval": 300,
         "max_interval": 420,
         "loop": true
-    },
-    {
-        "group_link": "https://t.me/superexofficial",
-        "session_folder": "SuperExGlobal",
-        "csv_file": "messages/SuperExGlobal/SuperExGlobal_messages.csv",
-        "media_base_dir": "messages/SuperExGlobal",
-        "min_interval": 300,
-        "max_interval": 420,
-        "loop": true
     }
 ]
